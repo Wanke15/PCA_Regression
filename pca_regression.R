@@ -1,0 +1,41 @@
+#数据
+car.data<-mtcars[,c(1,2,3,4,6,10)]
+#利用主成分分析函数princomp(),并利用协方差矩阵，进行主成分分析
+car.prc.data<-princomp(car.data[,-c(1)],cor = FALSE)
+#将各样本特征在主成分上的得分加入到原数据框中
+car.data$z1<-predict(car.prc.data)[,1]
+car.data$z2<-predict(car.prc.data)[,2]
+#在主成分上做线性回归
+car.prc.lm<-lm(mpg~z1+z2,data = car.data)
+#component()函数用于利用原始数据计算各变量在主成分上的得分
+component<-function(x){
+  #comp<-data.frame()
+  temp<-predict(car.prc.data,x)
+  comp<-data.frame(temp[,1],temp[,2])
+  names(comp)<-c("z1","z2")
+  return(comp)
+}
+#input()函数实现新数据录入的功能
+input<-function(){
+print("输入数据的cyl属性：")
+cyl=scan()
+print("输入数据的disp属性：")
+disp=scan()
+print("输入数据的hp属性：")
+hp=scan()
+print("输入数据的wt属性：")
+wt=scan()
+print("输入数据的gear属性：")
+gear=scan()
+my_data<-data.frame(cyl,disp,
+                    hp,wt,gear)
+return(my_data)}
+#输入新数据
+wo_data<-input()
+cat("原始特征数据:","\n")
+print(wo_data)
+#计算输入数据特征在主成分上的得分
+y=component(wo_data)
+#利用模型进行预测
+pred2<-predict(car.prc.lm,y)
+cat("预测值cyl:" ,pred2,"\n")
